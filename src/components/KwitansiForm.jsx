@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import KwitansiPreview from './KwitansiPreview';
 import { generateKwitansiPDF } from '../utils/pdfGenerator';
+import { generateKwitansiPDFFast } from '../utils/pdfGeneratorConfigurable';
 
 const KwitansiForm = () => {
   const [formData, setFormData] = useState({
@@ -42,7 +43,14 @@ const KwitansiForm = () => {
 
     setIsLoading(true);
     try {
-      await generateKwitansiPDF(formData, 'kwitansi-content');
+      await generateKwitansiPDFFast(formData, 'kwitansi-content');
+      // Tampilkan notifikasi sukses
+      setTimeout(() => {
+        alert('PDF sedang dibuka di tab baru. Jika popup diblokir, cek notifikasi browser Anda.');
+      }, 500);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Terjadi kesalahan saat membuat PDF');
     } finally {
       setIsLoading(false);
     }
