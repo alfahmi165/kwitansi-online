@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import KwitansiPreview from './KwitansiPreview';
 import { generateKwitansiPDF } from '../utils/pdfGenerator';
-import { generateKwitansiPDFFast } from '../utils/pdfGeneratorConfigurable';
 
 const KwitansiForm = () => {
   const [formData, setFormData] = useState({
@@ -18,10 +17,10 @@ const KwitansiForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name === 'nominal') {
       // Remove non-numeric characters except decimal point
-      const cleanValue = value.replace(/[^\d]/g, ''); 
+      const cleanValue = value.replace(/[^\d]/g, '');
       setFormData(prev => ({
         ...prev,
         [name]: cleanValue ? parseInt(cleanValue, 10) : ''
@@ -43,7 +42,7 @@ const KwitansiForm = () => {
 
     setIsLoading(true);
     try {
-      await generateKwitansiPDFFast(formData, 'kwitansi-content');
+      await generateKwitansiPDF(formData, 'kwitansi-content');
       // Tampilkan notifikasi sukses
       setTimeout(() => {
         alert('PDF sedang dibuka di tab baru. Jika popup diblokir, cek notifikasi browser Anda.');
@@ -85,7 +84,7 @@ const KwitansiForm = () => {
           {/* Form Section */}
           <div className="bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Isi Data Kwitansi</h2>
-            
+
             <form className="space-y-5">
               {/* No Kwitansi */}
               <div>
@@ -217,13 +216,14 @@ const KwitansiForm = () => {
                   {showPreview ? 'Hide' : 'Show'}
                 </button>
               </div>
-              
+
               {showPreview && (
-                <div className="bg-gray-100 p-4 overflow-auto max-h-[800px]">
-                  <div className="scale-50 origin-top-left">
+                <div className="bg-white-100 p-1 overflow-auto max-h-full">
+                  <div className="origin-top-left mx-auto scale-[75%]">
                     <KwitansiPreview data={formData} />
                   </div>
                 </div>
+
               )}
             </div>
           </div>

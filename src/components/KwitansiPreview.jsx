@@ -11,19 +11,6 @@ const KwitansiPreview = ({ data }) => {
     }).format(amount);
   };
 
-  // Format Tanggal Indonesia
-  const formatTanggalIndo = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString;
-
-    return date.toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
-
   // Convert number to words
   const numberToWords = (num) => {
     const ones = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan'];
@@ -87,8 +74,6 @@ const KwitansiPreview = ({ data }) => {
         fontFamily: "Times New Roman, serif",
         boxSizing: "border-box",
         color: "#000",
-        pageBreakAfter: "avoid", 
-        breakAfter: "avoid",
       }}
     >
       <div
@@ -97,27 +82,29 @@ const KwitansiPreview = ({ data }) => {
 
 
         {/* Nomor */}
-        <div className="flex items-baseline w-max mb-[5px]">
+        <div className="flex items-end w-max mb-[5px]">
+          {/* Berikan padding-bottom yang sama dengan kotak sebelah agar sejajar sempurna */}
           <div
             style={{
               width: 40,
-              fontSize: 18,
-              lineHeight: 1.2, /* Samakan line-height */
+              fontSize: 16,
+              paddingBottom: "4px",
             }}
           >
             No.
           </div>
 
-          <div className="inline-block border-b border-black">
-            <div
-              style={{
-                fontSize: 16,
-                lineHeight: 1.2,
-                paddingBottom: 8,
-              }}
-            >
-              {data.no}
-            </div>
+          {/* Gabungkan border langsung di elemen teks dan beri padding yang aman */}
+          <div
+            className="border-b border-black text-left"
+            style={{
+              fontSize: 16,
+              lineHeight: "1.5", // Naikkan line-height agar teks tidak tertekan ke bawah
+              paddingBottom: "4px", // Jarak aman antara teks dan garis bawah (border)
+              minWidth: "100px", // Opsional: Beri lebar minimal agar garis bawah tetap manis jika nomornya pendek
+            }}
+          >
+            {data.no}
           </div>
         </div>
 
@@ -125,23 +112,20 @@ const KwitansiPreview = ({ data }) => {
 
         {/* Terima dari */}
 
-        <div className="flex items-baseline">
+        <div className="flex items-baseline w-full">
           <div
             style={{
               width: 180,
-              fontSize: 18,
-              lineHeight: 1.2, /* Ditambahkan agar tinggi baris virtual sama */
+              fontSize: 16,
             }}
           >
             Telah terima dari:
           </div>
 
           <div
-            className="flex-1 border-b border-black uppercase"
+            className="flex-1 text-left"
             style={{
               fontSize: 16,
-              lineHeight: 1.2, /* Ditambahkan agar tinggi baris virtual sama */
-              paddingBottom: 8,
             }}
           >
             {data.terimaDari}
@@ -151,82 +135,90 @@ const KwitansiPreview = ({ data }) => {
 
         {/* Terbilang */}
 
-        <div className="flex">
+        <div className="flex items-start w-full mt-[10px] mb-[10px]">
           <div
             style={{
               width: 180,
-              fontSize: 18,
-              lineHeight: "10px",
-              paddingBottom: 8, /* Samakan padding bawah dengan div sebelah */
+              fontSize: 16,
+              flexShrink: 0,
             }}
           >
             Uang sejumlah:
           </div>
 
           <div
-            className="flex-1 border-b border-black pt-2 px-2" /* Ganti p-2 menjadi pt-2 px-2, pb-2 dibuang */
+            className="flex-1 text-justify border-b border-t border-black"
             style={{
-              fontSize: 16,
-              lineHeight: 1.2, /* Tambahkan line-height agar teks stabil */
-              paddingBottom: 8, /* Gunakan px konstan agar sejajar dengan teks kiri */
-              backgroundColor: 'rgba(254, 254, 254, 0.1)',
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='0.5' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`
+              // fontSize: 16,
+              // lineHeight: "1.2", // sebelumnya 1.8
+              // paddingLeft: "12px",
+              // paddingRight: "12px",
+              // // paddingTop: "5px",
+              // // paddingBottom: "5px",
+              // backgroundRepeat: "repeat",
+              // // backgroundPosition: "top left",
+              // backgroundColor: "rgba(254, 254, 254, 0.1)",
+              // backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='0.5' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
+              // // transform: "translateY(20px)",
+              // backgroundSize: "6px 20px",
+              // backgroundPosition: "0 10px",
             }}
           >
-            <span className="relative -top-[10px]">
-
+            <span className="lowercase capitalize inline-block">
               {data.nominal
-                ? numberToWords(data.nominal).toUpperCase() + " RUPIAH"
+                ? numberToWords(data.nominal) + " Rupiah"
                 : ""}
             </span>
           </div>
         </div>
 
 
+
+
         {/* Untuk pembayaran */}
-        <div className="flex items-start w-full">
-          {/* Bagian Label Kiri */}
+
+        <div className="flex items-start">
           <div
-            className="font-medium"
             style={{
               width: 180,
-              fontSize: 18,
-              lineHeight: "2px",
+              fontSize: 16,
+              paddingTop: 4,
             }}
           >
-            Untuk pembayaran :
+            Untuk pembayaran
           </div>
 
           <div
-            className="flex-1 text-justify"
+            className="flex-1 border-b border-black uppercase"
             style={{
               fontSize: 16,
-              lineHeight: "24px",
+              minHeight: 70,
+              lineHeight: 1.35,
               whiteSpace: "pre-wrap",
-              // Memberikan padding bottom minimal setengah atau satu tinggi baris (24px)
-              paddingBottom: "24px",
-              backgroundImage: "linear-gradient(to bottom, transparent 23px, #000000 23px)",
-              backgroundSize: "100% 24px",
-              backgroundRepeat: "repeat",
+              paddingTop: 4,
+              paddingBottom: 2,
             }}
           >
-            <span className="relative -top-[10px]">
-              {data.untukPembayaran}
-            </span>
+            {data.untukPembayaran}
           </div>
         </div>
 
-
-
-
-
         {/* Footer */}
-        {/* {Kota & Tanggal} */}
 
-        <div className="w-full flex justify-end items-center gap-1 mt-1 mb-2 text-md">
-          <p>{data.kota ? data.kota : ""}</p>
-          <p>,</p>
-          <p>{data.tanggal ? formatTanggalIndo(data.tanggal) : ""}</p>
+        {/* Kota */}
+
+        <div
+          className="border-b border-black"
+          style={{
+            width: 330,
+            textAlign: "center",
+            fontSize: 16,
+            paddingBottom: 2,
+          }}
+        >
+          <span className='capitalize'>{data.kota.toLowerCase()}</span>
+          <span>, </span>
+          <span>{data.tanggal}</span>
         </div>
 
 
@@ -234,12 +226,11 @@ const KwitansiPreview = ({ data }) => {
 
           {/* Nominal */}
 
-          <div className="flex items-end w-max mb-1">
+          <div className="flex items-end w-max">
             <span
               style={{
                 fontSize: 22,
                 marginRight: 10,
-                marginBottom: 10,
               }}
             >
               Rp.
@@ -249,16 +240,16 @@ const KwitansiPreview = ({ data }) => {
               className="inline-block pl-2 pr-2 border-b border-t border-black"
               style={{
                 textAlign: "left",
-                fontSize: 22,
+                fontSize: 26,
                 lineHeight: 1.2,
                 backgroundColor: 'rgba(254, 254, 254, 0.1)',
                 backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='0.5' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`
 
               }}
-            > <span className="relative -top-[12px]">
-                {data.nominal
-                  ? new Intl.NumberFormat("id-ID").format(data.nominal)
-                  : ""} </span>
+            >
+              {data.nominal
+                ? new Intl.NumberFormat("id-ID").format(data.nominal)
+                : ""}
             </div>
           </div>
 

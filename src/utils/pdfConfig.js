@@ -6,7 +6,7 @@
 export const PDF_CONFIG = {
   // Html2Canvas Settings
   canvas: {
-    scale: 1, // 1-5: Kualitas rendering (lebih tinggi = lebih baik tapi lebih lambat)
+    scale: 5, // 1-5: Kualitas rendering (lebih tinggi = lebih baik tapi lebih lambat)
     useCORS: true, // Gunakan CORS untuk external images
     allowTaint: true, // Allow images yang tidak memiliki CORS
     backgroundColor: '#ffffff',
