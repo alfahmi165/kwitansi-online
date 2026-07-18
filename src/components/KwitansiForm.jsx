@@ -1,0 +1,307 @@
+import React, { useState, useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
+import KwitansiPreview from './KwitansiPreview';
+import { formatCurrency } from '../utils/numberToWords';
+
+const KwitansiForm = () => {
+  const [formData, setFormData] = useState({
+    no: '',
+    terimaDari: '',
+    nominal: '',
+    untukPembayaran: '',
+    kota: '',
+    tanggal: new Date().toISOString().split('T')[0],
+  });
+
+  const [showPreview, setShowPreview] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showBackground, setShowBackground] = useState(true);
+
+  // Ref untuk komponen yang akan di-print
+  const componentRef = useRef();
+
+  // Setup react-to-print hook with enhanced print settings
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+    documentTitle: `Kwitansi_${formData.no}_${new Date().getTime()}`,
+    onBeforePrint: () => {
+      setIsLoading(true);
+      console.log('Starting print...');
+    },
+    onAfterPrint: () => {
+      setIsLoading(false);
+      console.log('Print completed');
+    },
+    pageStyle: `
+      @page {
+        size: A4 portrait;
+        margin: 0;
+        padding: 0;
+      }
+      
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+      }
+      
+      .kwitansi-print {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background-size: 100% 100% !important;
+        background-repeat: no-repeat !important;
+        background-attachment: scroll !important;
+        background-position: 0 0 !important;
+        box-shadow: none !important;
+      }
+    `,
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === 'nominal') {
+      // Remove non-numeric characters
+      const cleanValue = value.replace(/[^\d]/g, '');
+      setFormData(prev => ({
+        ...prev,
+        [name]: cleanValue ? parseInt(cleanValue, 10) : ''
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  const handlePrintClick = () => {
+    // Validate form
+    if (!formData.no || !formData.terimaDari || !formData.nominal || !formData.untukPembayaran || !formData.kota || !formData.tanggal) {
+      alert('Mohon isi semua field sebelum mencetak');
+      return;
+    }
+
+    // Trigger print
+    handlePrint();
+  };
+
+  const handleReset = () => {
+    setFormData({
+      no: '',
+      terimaDari: '',
+      nominal: '',
+      untukPembayaran: '',
+      kota: '',
+      tanggal: new Date().toISOString().split('T')[0],
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">Aplikasi Kwitansi Online</h1>
+          <p className="text-gray-600">Buat dan cetak kwitansi dalam format PDF dengan presisi tinggi</p>
+          <p className="text-sm text-green-600 mt-2">✅ Menggunakan React to Print - Rendering PDF lebih presisi</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Form Section */}
+          <div className="no-print bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Isi Data Kwitansi</h2>
+
+            <form className="space-y-5">
+              {/* No Kwitansi */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  No. Kwitansi <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="no"
+                  value={formData.no}
+                  onChange={handleChange}
+                  placeholder="Contoh: BKU1CS123456789000"
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                />
+              </div>
+
+              {/* Telah Terima Dari */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Telah Terima Dari <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="terimaDari"
+                  value={formData.terimaDari}
+                  onChange={handleChange}
+                  placeholder="Nama penerima pembayaran"
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                />
+              </div>
+
+              {/* Nominal */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Uang Sejumlah (Rp) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="nominal"
+                  value={formatCurrency(formData.nominal)}
+                  onChange={handleChange}
+                  placeholder="Contoh: 99999999"
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                />
+                <p className="text-xs text-gray-500 mt-1">Masukkan angka tanpa titik atau koma</p>
+              </div>
+
+              {/* Untuk Pembayaran */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Untuk Pembayaran <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  name="untukPembayaran"
+                  value={formData.untukPembayaran}
+                  onChange={handleChange}
+                  placeholder="Keterangan pembayaran (misal: Biaya Sewa, Biaya Layanan, dll)"
+                  rows="3"
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition resize-none"
+                />
+              </div>
+
+              {/* Kota */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Kota <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="kota"
+                  value={formData.kota}
+                  onChange={handleChange}
+                  placeholder="Contoh: Bandung"
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                />
+              </div>
+
+              {/* Tanggal */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Tanggal <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  name="tanggal"
+                  value={formData.tanggal}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                />
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-4 pt-6">
+                <button
+                  type="button"
+                  onClick={handlePrintClick}
+                  disabled={isLoading}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105 active:scale-95"
+                >
+                  {isLoading ? '⏳ Memproses...' : '🖨️ Cetak PDF'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105 active:scale-95"
+                >
+                  🔄 Reset Form
+                </button>
+              </div>
+            </form>
+
+            {/* Info Box - Print Settings */}
+            <div className="mt-8 p-4 bg-amber-50 border-l-4 border-amber-500 rounded">
+              <p className="text-sm text-gray-700 mb-2">
+                <span className="font-semibold">🖨️ Print Settings untuk Background Gambar:</span>
+              </p>
+              <ul className="text-xs text-gray-600 space-y-1 ml-4">
+                <li>✓ Chrome: Print → Lebih settings → Centang "Background graphics"</li>
+                <li>✓ Firefox: Print → Print to File → Centang "Print backgrounds"</li>
+                <li>✓ Safari: Print → Centang "Print backgrounds"</li>
+              </ul>
+            </div>
+
+            {/* Info Box */}
+            <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">💡 Tips:</span> Pastikan semua data sudah benar sebelum mencetak. Gunakan Chrome untuk hasil terbaik.
+              </p>
+            </div>
+
+            {/* Info Box - React to Print */}
+            <div className="mt-4 p-4 bg-green-50 border-l-4 border-green-500 rounded">
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">✨ Fitur:</span> React to Print dengan CSS print optimization untuk background image support.
+              </p>
+            </div>
+          </div>
+
+          {/* Preview Section */}
+          <div className="no-print sticky top-8">
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+              <div className="bg-gray-800 text-white p-4 flex items-center justify-between">
+                <h3 className="text-lg font-bold">Preview Kwitansi</h3>
+                <button
+                  onClick={() => setShowPreview(!showPreview)}
+                  className="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded transition"
+                >
+                  {showPreview ? '🙈 Hide' : '👁️ Show'}
+                </button>
+              </div>
+
+              {showPreview && (
+                <div className="bg-gray-200 p-4 overflow-hidden h-auto">
+                  <div className="mb-2 flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="bgToggle"
+                      checked={showBackground}
+                      onChange={(e) => setShowBackground(e.target.checked)}
+                      className="cursor-pointer"
+                    />
+                    <label htmlFor="bgToggle" className="text-xs text-gray-600 cursor-pointer">
+                      Tampilkan background template
+                    </label>
+                  </div>
+                  <div className="flex justify-center">
+                    {/* <div style={{ width: '210mm', transform: 'scale(0.75)', transformOrigin: 'top center' }}> */}
+                    <div className="w-[210mm] scale-[0.45] md:scale-[0.75] origin-top">
+                      <KwitansiPreview data={formData} showBg={showBackground} />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Hidden Print Component */}
+      <div style={{ display: 'none' }}>
+        <KwitansiPreview ref={componentRef} data={formData} showBg={showBackground} />
+      </div>
+    </div>
+  );
+};
+
+export default KwitansiForm;
