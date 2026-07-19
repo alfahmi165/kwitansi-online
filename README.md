@@ -16,14 +16,14 @@ Aplikasi web untuk membuat dan mencetak kwitansi (bukti pembayaran) dalam format
 
 ### Yang Berubah
 
-| Aspek | Versi Lama | Versi Baru |
-|-------|-----------|-----------|
-| Library PDF | `jsPDF + html2canvas` | **React to Print** |
-| Rendering | Canvas-based (raster) | **DOM-based (native print)** |
-| Presisi PDF | Sedang | **Tinggi ✓** |
-| Ukuran Bundle | ~250KB | **~20KB ✓** |
-| Performance | Slower (canvas render) | **Faster ✓** |
-| Browser Print Dialog | Tidak | **Ya ✓** |
+| Aspek                | Versi Lama             | Versi Baru                   |
+| -------------------- | ---------------------- | ---------------------------- |
+| Library PDF          | `jsPDF + html2canvas`  | **React to Print**           |
+| Rendering            | Canvas-based (raster)  | **DOM-based (native print)** |
+| Presisi PDF          | Sedang                 | **Tinggi ✓**                 |
+| Ukuran Bundle        | ~250KB                 | **~20KB ✓**                  |
+| Performance          | Slower (canvas render) | **Faster ✓**                 |
+| Browser Print Dialog | Tidak                  | **Ya ✓**                     |
 
 ### Keuntungan React to Print
 
@@ -37,6 +37,7 @@ Aplikasi web untuk membuat dan mencetak kwitansi (bukti pembayaran) dalam format
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js >= 16
 - npm atau yarn
 
@@ -121,17 +122,20 @@ kwitansi-online-improved/
 ## 📝 File Penting
 
 ### KwitansiForm.jsx
+
 - Main form component
 - Handles form state management
 - Setup print hook dengan `useReactToPrint`
 - Real-time preview
 
 ### KwitansiPreview.jsx
+
 - Komponen untuk ditampilkan di preview dan saat print
 - Menggunakan `forwardRef` untuk react-to-print
 - Styling optimized untuk print
 
 ### numberToWords.js
+
 - Convert number ke terbilang (Rp 100.000 → seratus ribu)
 - Format currency
 - Utility functions
@@ -139,26 +143,31 @@ kwitansi-online-improved/
 ## 🐛 Troubleshooting
 
 ### Printing tidak muncul di preview?
+
 - Pastikan semua field sudah diisi
 - Refresh halaman dan coba lagi
 
 ### Font tidak sesuai saat print?
+
 - Font yang digunakan adalah Times New Roman (serif)
 - Pastikan font tersedia di sistem
 - Bisa di-customize di `KwitansiPreview.jsx`
 
 ### Layout berantakan saat print?
+
 - Cek ukuran monitor/zoom browser
 - Reset zoom ke 100% (Ctrl+0 atau Cmd+0)
 - Pastikan tidak ada extension browser yang interfere
 
 ### Background tidak muncul?
+
 - Print settings harus mengaktifkan "Background graphics"
 - Bisa set default di browser print settings
 
 ## 📱 Responsive Design
 
 Aplikasi responsif di semua ukuran layar:
+
 - **Desktop** - Full layout dengan preview di samping
 - **Tablet** - Stack layout, preview di bawah
 - **Mobile** - Optimized untuk mobile browsing

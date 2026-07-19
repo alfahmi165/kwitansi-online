@@ -1,32 +1,21 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@import "tailwindcss";
 
 @media print {
-  body {
-    margin: 0;
-    padding: 0;
-    background: white;
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-  
+
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
   .no-print {
     display: none !important;
   }
-  
+
   .print-container {
     margin: 0;
     padding: 0;
@@ -34,19 +23,23 @@ body {
     page-break-after: avoid;
   }
 }
-
 /* Utility class untuk print */
 .kwitansi-print {
   width: 210mm;
   height: 297mm;
   padding: 20px;
-  font-family: 'Times New Roman', serif;
+  font-family: "Times New Roman", serif;
   color: #000;
   background: white;
   box-sizing: border-box;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
 }
 
 @page {
   size: A4 portrait;
   margin: 0;
+  padding: 0;
 }

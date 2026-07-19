@@ -1,39 +1,24 @@
-# Dependency directories (Folder library pihak ketiga)
-node_modules/
-jspm_packages/
-web_modules/
-
-# Production build outputs (Folder hasil compile/build)
-dist/
-build/
-.next/
-out/
-
-# Local env files (File rahasia/konfigurasi lokal - JANGAN di-upload ke GitHub)
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-*.env.local
-
-# Logs (File pencatat error)
+# Logs
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
-# Editor directories and files (Konfigurasi text editor/IDE Anda)
-.vscode/
-.idea/
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-
-# OS metadata (File sampah otomatis dari Sistem Operasi)
-.DS_Store
-Thumbs.db

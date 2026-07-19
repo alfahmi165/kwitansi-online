@@ -1,6 +1,4 @@
-import React from 'react';
-import KwitansiForm from './components/KwitansiForm';
-import './index.css';
+import KwitansiForm from "./components/KwitansiForm";
 
 function App() {
   return (

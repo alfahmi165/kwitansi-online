@@ -1,90 +1,121 @@
-import React, { useState, useRef } from 'react';
-import { useReactToPrint } from 'react-to-print';
-import KwitansiPreview from './KwitansiPreview';
-import { formatCurrency } from '../utils/numberToWords';
+import { useState, useRef } from "react";
+import { useReactToPrint } from "react-to-print";
+import KwitansiPreview from "./KwitansiPreview";
+import { formatCurrency } from "../utils/numberToWords";
 
 const KwitansiForm = () => {
+  const [errors, setErrors] = useState({
+    nominal: "",
+  });
+
   const [formData, setFormData] = useState({
-    no: '',
-    terimaDari: '',
-    nominal: '',
-    untukPembayaran: '',
-    kota: '',
-    tanggal: new Date().toISOString().split('T')[0],
+    no: "",
+    terimaDari: "",
+    nominal: 0,
+    untukPembayaran: "",
+    kota: "",
+    tanggal: new Date().toISOString().split("T")[0],
   });
 
   const [showPreview, setShowPreview] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
   const [showBackground, setShowBackground] = useState(true);
 
   // Ref untuk komponen yang akan di-print
-  const componentRef = useRef();
+  const componentRef = useRef(null);
 
   // Setup react-to-print hook with enhanced print settings
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
     documentTitle: `Kwitansi_${formData.no}_${new Date().getTime()}`,
-    onBeforePrint: () => {
-      setIsLoading(true);
-      console.log('Starting print...');
-    },
-    onAfterPrint: () => {
-      setIsLoading(false);
-      console.log('Print completed');
-    },
     pageStyle: `
-      @page {
-        size: A4 portrait;
-        margin: 0;
-        padding: 0;
-      }
-      
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-      }
-      
-      body {
-        margin: 0 !important;
-        padding: 0 !important;
-        background: white !important;
-      }
-      
-      .kwitansi-print {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        background-size: 100% 100% !important;
-        background-repeat: no-repeat !important;
-        background-attachment: scroll !important;
-        background-position: 0 0 !important;
-        box-shadow: none !important;
-      }
-    `,
+    @page {
+      size: A4 portrait;
+      margin: 0;
+      padding: 0;
+    }
+
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      background: white !important;
+    }
+
+    .kwitansi-print {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      background-size: 100% 100% !important;
+      background-repeat: no-repeat !important;
+      background-position: 0 0 !important;
+      box-shadow: none !important;
+    }
+  `,
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === 'nominal') {
-      // Remove non-numeric characters
-      const cleanValue = value.replace(/[^\d]/g, '');
-      setFormData(prev => ({
+    if (name === "nominal") {
+      const cleanValue = value.replace(/[^\d]/g, "");
+
+      if (!cleanValue) {
+        setFormData((prev) => ({
+          ...prev,
+          nominal: 0,
+        }));
+
+        setErrors((prev) => ({
+          ...prev,
+          nominal: "",
+        }));
+
+        return;
+      }
+
+      const amount = Number(cleanValue);
+
+      if (!Number.isSafeInteger(amount)) {
+        setErrors((prev) => ({
+          ...prev,
+          nominal: "Nominal terlalu besar.",
+        }));
+
+        return;
+      }
+
+      setErrors((prev) => ({
         ...prev,
-        [name]: cleanValue ? parseInt(cleanValue, 10) : ''
+        nominal: "",
       }));
-    } else {
-      setFormData(prev => ({
+
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
+        nominal: amount,
       }));
+
+      return;
     }
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handlePrintClick = () => {
     // Validate form
-    if (!formData.no || !formData.terimaDari || !formData.nominal || !formData.untukPembayaran || !formData.kota || !formData.tanggal) {
-      alert('Mohon isi semua field sebelum mencetak');
+    if (
+      !formData.no ||
+      !formData.terimaDari ||
+      formData.nominal <= 0 ||
+      !formData.untukPembayaran ||
+      !formData.kota ||
+      !formData.tanggal
+    ) {
+      alert("Mohon isi semua field sebelum mencetak");
       return;
     }
 
@@ -94,34 +125,36 @@ const KwitansiForm = () => {
 
   const handleReset = () => {
     setFormData({
-      no: '',
-      terimaDari: '',
-      nominal: '',
-      untukPembayaran: '',
-      kota: '',
-      tanggal: new Date().toISOString().split('T')[0],
+      no: "",
+      terimaDari: "",
+      nominal: 0,
+      untukPembayaran: "",
+      kota: "",
+      tanggal: new Date().toISOString().split("T")[0],
     });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 py-8 px-4">
+      <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Aplikasi Kwitansi Online</h1>
+        <div className="mb-8 text-center">
+          <h1 className="mb-2 text-4xl font-bold text-gray-800">Aplikasi Kwitansi Online</h1>
           <p className="text-gray-600">Buat dan cetak kwitansi dalam format PDF dengan presisi tinggi</p>
-          <p className="text-sm text-green-600 mt-2">✅ Menggunakan React to Print - Rendering PDF lebih presisi</p>
+          <p className="mt-2 text-sm text-green-600">
+            ✅ Menggunakan React to Print - Rendering PDF lebih presisi
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Form Section */}
-          <div className="no-print bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Isi Data Kwitansi</h2>
+          <div className="no-print rounded-lg bg-white p-8 shadow-lg">
+            <h2 className="mb-6 text-2xl font-bold text-gray-800">Isi Data Kwitansi</h2>
 
             <form className="space-y-5">
               {/* No Kwitansi */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
                   No. Kwitansi <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -130,13 +163,13 @@ const KwitansiForm = () => {
                   value={formData.no}
                   onChange={handleChange}
                   placeholder="Contoh: BKU1CS123456789000"
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                  className="w-full rounded-lg border-2 border-gray-300 px-4 py-2 transition focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
               {/* Telah Terima Dari */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Telah Terima Dari <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -145,13 +178,13 @@ const KwitansiForm = () => {
                   value={formData.terimaDari}
                   onChange={handleChange}
                   placeholder="Nama penerima pembayaran"
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                  className="w-full rounded-lg border-2 border-gray-300 px-4 py-2 transition focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
               {/* Nominal */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Uang Sejumlah (Rp) <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -160,14 +193,18 @@ const KwitansiForm = () => {
                   value={formatCurrency(formData.nominal)}
                   onChange={handleChange}
                   placeholder="Contoh: 99999999"
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                  className="w-full rounded-lg border-2 border-gray-300 px-4 py-2 transition focus:border-blue-500 focus:outline-none"
                 />
-                <p className="text-xs text-gray-500 mt-1">Masukkan angka tanpa titik atau koma</p>
+                {errors.nominal ? (
+                  <p className="mt-1 text-sm text-red-500">{errors.nominal}</p>
+                ) : (
+                  <p className="mt-1 text-sm text-gray-500">Masukkan angka tanpa titik atau koma</p>
+                )}
               </div>
 
               {/* Untuk Pembayaran */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Untuk Pembayaran <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -176,13 +213,13 @@ const KwitansiForm = () => {
                   onChange={handleChange}
                   placeholder="Keterangan pembayaran (misal: Biaya Sewa, Biaya Layanan, dll)"
                   rows="3"
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition resize-none"
+                  className="w-full resize-none rounded-lg border-2 border-gray-300 px-4 py-2 transition focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
               {/* Kota */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Kota <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -191,13 +228,13 @@ const KwitansiForm = () => {
                   value={formData.kota}
                   onChange={handleChange}
                   placeholder="Contoh: Bandung"
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                  className="w-full rounded-lg border-2 border-gray-300 px-4 py-2 transition focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
               {/* Tanggal */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Tanggal <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -205,7 +242,7 @@ const KwitansiForm = () => {
                   name="tanggal"
                   value={formData.tanggal}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                  className="w-full rounded-lg border-2 border-gray-300 px-4 py-2 transition focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
@@ -214,15 +251,14 @@ const KwitansiForm = () => {
                 <button
                   type="button"
                   onClick={handlePrintClick}
-                  disabled={isLoading}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105 active:scale-95"
+                  className="active:scale-95 flex-1 transform rounded-lg bg-blue-600 px-6 py-3 font-bold text-white transition hover:scale-105 hover:bg-blue-700 disabled:bg-gray-400"
                 >
-                  {isLoading ? '⏳ Memproses...' : '🖨️ Cetak PDF'}
+                  🖨️ Cetak PDF
                 </button>
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105 active:scale-95"
+                  className="active:scale-95 flex-1 transform rounded-lg bg-gray-400 px-6 py-3 font-bold text-white transition hover:scale-105 hover:bg-gray-500"
                 >
                   🔄 Reset Form
                 </button>
@@ -230,11 +266,11 @@ const KwitansiForm = () => {
             </form>
 
             {/* Info Box - Print Settings */}
-            <div className="mt-8 p-4 bg-amber-50 border-l-4 border-amber-500 rounded">
-              <p className="text-sm text-gray-700 mb-2">
+            <div className="mt-8 rounded border-l-4 border-amber-500 bg-amber-50 p-4">
+              <p className="mb-2 text-sm text-gray-700">
                 <span className="font-semibold">🖨️ Print Settings untuk Background Gambar:</span>
               </p>
-              <ul className="text-xs text-gray-600 space-y-1 ml-4">
+              <ul className="ml-4 space-y-1 text-xs text-gray-600">
                 <li>✓ Chrome: Print → Lebih settings → Centang "Background graphics"</li>
                 <li>✓ Firefox: Print → Print to File → Centang "Print backgrounds"</li>
                 <li>✓ Safari: Print → Centang "Print backgrounds"</li>
@@ -242,35 +278,37 @@ const KwitansiForm = () => {
             </div>
 
             {/* Info Box */}
-            <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+            <div className="mt-4 rounded border-l-4 border-blue-500 bg-blue-50 p-4">
               <p className="text-sm text-gray-700">
-                <span className="font-semibold">💡 Tips:</span> Pastikan semua data sudah benar sebelum mencetak. Gunakan Chrome untuk hasil terbaik.
+                <span className="font-semibold">💡 Tips:</span> Pastikan semua data sudah benar sebelum
+                mencetak. Gunakan Chrome untuk hasil terbaik.
               </p>
             </div>
 
             {/* Info Box - React to Print */}
-            <div className="mt-4 p-4 bg-green-50 border-l-4 border-green-500 rounded">
+            <div className="mt-4 rounded border-l-4 border-green-500 bg-green-50 p-4">
               <p className="text-sm text-gray-700">
-                <span className="font-semibold">✨ Fitur:</span> React to Print dengan CSS print optimization untuk background image support.
+                <span className="font-semibold">✨ Fitur:</span> React to Print dengan CSS print optimization
+                untuk background image support.
               </p>
             </div>
           </div>
 
           {/* Preview Section */}
           <div className="no-print sticky top-8">
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <div className="bg-gray-800 text-white p-4 flex items-center justify-between">
+            <div className="overflow-hidden rounded-lg bg-white shadow-lg">
+              <div className="flex items-center justify-between bg-gray-800 p-4 text-white">
                 <h3 className="text-lg font-bold">Preview Kwitansi</h3>
                 <button
                   onClick={() => setShowPreview(!showPreview)}
-                  className="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded transition"
+                  className="rounded bg-gray-700 px-3 py-1 text-sm transition hover:bg-gray-600"
                 >
-                  {showPreview ? '🙈 Hide' : '👁️ Show'}
+                  {showPreview ? "🙈 Hide" : "👁️ Show"}
                 </button>
               </div>
 
               {showPreview && (
-                <div className="bg-gray-200 p-4 overflow-hidden h-auto">
+                <div className="h-auto overflow-hidden bg-gray-200 p-4">
                   <div className="mb-2 flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -279,13 +317,12 @@ const KwitansiForm = () => {
                       onChange={(e) => setShowBackground(e.target.checked)}
                       className="cursor-pointer"
                     />
-                    <label htmlFor="bgToggle" className="text-xs text-gray-600 cursor-pointer">
+                    <label htmlFor="bgToggle" className="cursor-pointer text-xs text-gray-600">
                       Tampilkan background template
                     </label>
                   </div>
                   <div className="flex justify-center">
-                    {/* <div style={{ width: '210mm', transform: 'scale(0.75)', transformOrigin: 'top center' }}> */}
-                    <div className="w-[210mm] scale-[0.45] md:scale-[0.75] origin-top">
+                    <div className="w-[210mm] origin-top scale-[0.45] md:scale-[0.75]">
                       <KwitansiPreview data={formData} showBg={showBackground} />
                     </div>
                   </div>
@@ -297,7 +334,7 @@ const KwitansiForm = () => {
       </div>
 
       {/* Hidden Print Component */}
-      <div style={{ display: 'none' }}>
+      <div className="fixed left-[-9999px] top-0">
         <KwitansiPreview ref={componentRef} data={formData} showBg={showBackground} />
       </div>
     </div>
