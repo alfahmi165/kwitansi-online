@@ -14,7 +14,11 @@ const KwitansiForm = () => {
     nominal: 0,
     untukPembayaran: "",
     kota: "",
-    tanggal: new Date().toISOString().split("T")[0],
+    tanggal: new Date().toLocaleDateString("id-ID", {
+  day: "numeric",
+  month: "long",
+  year: "numeric"
+}),
   });
 
   const [showPreview, setShowPreview] = useState(true);
